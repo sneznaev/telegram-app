@@ -4,7 +4,7 @@ services:
     env: python
     plan: free
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "python app/main.py"
+    startCommand: "startCommand: gunicorn run:app --bind 0.0.0.0:10000"
     envVars:
       - key: DATABASE_URL
         value: {{database_url}}  # Используй секреты Render для хранения реального значения
