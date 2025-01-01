@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: telegram-app
+    env: python
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python app/main.py"
+    envVars:
+      - key: DATABASE_URL
+        value: {{database_url}}  # Используй секреты Render для хранения реального значения
+      - key: TELEGRAM_BOT_TOKEN
+        value: {{telegram_bot_token}}
+      - key: RENDER_EXTERNAL_URL
+        value: {{render_external_url}}
