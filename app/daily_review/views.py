@@ -29,6 +29,11 @@ PREDEFINED_QUESTIONS = [
 @login_required
 def get_daily_review():
     user_id = session.get("user_id")
+    
+     # Инициализация предустановленных вопросов
+    initialize_predefined_questions(user_id)
+    
+    
     selected_date = request.args.get('date')  # Дата из запроса
     try:
         if selected_date:
@@ -100,6 +105,7 @@ def get_daily_review():
 @login_required
 def customize_questions():
     user_id = session.get("user_id")
+    
     try:
         if request.method == 'POST':
             # Получение новых текстов вопросов
@@ -277,3 +283,17 @@ def delete_report(report_id):
     
     # Возвращаем пользователя на страницу истории
     return redirect(url_for('daily_review.view_history'))
+
+# Предустановленные вопросы 
+def initialize_predefined_questions(user_id):
+    # Проверяем, есть ли вопросы в базе данных для текущего пользователя
+    existing_questions = db_session.query(DailyReviewQuestions).filter_by(user_id=user_id).count()
+    if existing_questions == 0:
+        # Создаем предустановленные вопросы
+        new_questions = [
+            DailyReviewQuestions(user_id=user_id, question_text=question)
+            for question in PREDEFINED_QUESTIONS
+        ]
+        db_session.add_all(new_questions)
+        db_session.commit()
+        logger.info(f"Предустановленные вопросы созданы для пользователя {user_id}.")
