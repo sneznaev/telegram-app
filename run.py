@@ -5,6 +5,7 @@ from app.common.database import init_db
 from app.main import main_bp
 from app.gallery import gallery_bp
 from app.goals import goals_bp
+from app.daily_review.views import daily_review_bp
 
 # Создаем приложение Flask
 def create_app():
@@ -16,6 +17,8 @@ def create_app():
     app.register_blueprint(main_bp, url_prefix="/")
     app.register_blueprint(gallery_bp, url_prefix="/gallery")
     app.register_blueprint(goals_bp, url_prefix="/goals")
+    app.register_blueprint(daily_review_bp, url_prefix="/daily-review")
+
 
     # Инициализация базы данных
     with app.app_context():

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Настройка вопросов</title>
+    <!-- Подключение Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Подключение Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        .question-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .question-text {
+            flex-grow: 1;
+        }
+        .question-number {
+            width: 3rem;
+            text-align: center;
+            font-weight: bold;
+        }
+        .delete-icon {
+            cursor: pointer;
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Настройка вопросов</h1>
+
+        <!-- Ссылки навигации -->
+        <div class="d-flex justify-content-between mb-4">
+            <a href="{{ url_for('main.index') }}" class="btn btn-outline-primary">На главную</a>
+            <a href="{{ url_for('daily_review.get_daily_review') }}" class="btn btn-outline-secondary">К отчёту</a>
+        </div>
+
+        <!-- Контейнер для вопросов -->
+        <div id="questions-container">
+            {% for question in questions %}
+            <div class="question-item">
+                <span class="question-number">{{ loop.index }}</span>
+                <input type="text" name="question_text" class="form-control question-text" value="{{ question.question_text }}" maxlength="250" required 
+                       oninput="saveQuestion({{ question.id }}, this.value)">
+                <i class="fas fa-trash delete-icon ms-2" onclick="deleteQuestion({{ question.id }})"></i>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Кнопка добавления нового вопроса -->
+        <button type="button" id="add-question-btn" class="btn btn-success mb-3">Добавить вопрос</button>
+    </div>
+
+    <!-- Подключение Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const questionsContainer = document.getElementById('questions-container');
+        const addQuestionBtn = document.getElementById('add-question-btn');
+        let questionIndex = {{ questions|length }} + 1;
+
+        // Добавление нового вопроса
+        addQuestionBtn.addEventListener('click', () => {
+            const questionItem = document.createElement('div');
+            questionItem.className = 'question-item';
+            questionItem.innerHTML = `
+                <span class="question-number">${questionIndex}</span>
+                <input type="text" name="question_text" class="form-control question-text" maxlength="250" required
+                       oninput="saveNewQuestion(this, ${questionIndex})">
+                <i class="fas fa-trash delete-icon ms-2" onclick="this.parentElement.remove()"></i>
+            `;
+            questionsContainer.appendChild(questionItem);
+            questionIndex++;
+        });
+
+        // Сохранение изменения вопроса
+        function saveQuestion(questionId, value) {
+            fetch(`{{ url_for('daily_review.save_question') }}?question_id=${questionId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question_text: value })
+            }).then(response => {
+                if (!response.ok) {
+                    alert('Ошибка при сохранении.');
+                }
+            });
+        }
+
+        // Сохранение нового вопроса
+        function saveNewQuestion(input, index) {
+            fetch(`{{ url_for('daily_review.add_question') }}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question_text: input.value })
+            }).then(response => {
+                if (response.ok) {
+                    response.json().then(data => {
+                        input.setAttribute('oninput', `saveQuestion(${data.question_id}, this.value)`);
+                        input.nextSibling.setAttribute('onclick', `deleteQuestion(${data.question_id})`);
+                    });
+                } else {
+                    alert('Ошибка при добавлении вопроса.');
+                }
+            });
+        }
+
+        // Удаление вопроса
+        function deleteQuestion(questionId) {
+            fetch(`{{ url_for('daily_review.delete_question') }}?question_id=${questionId}`, {
+                method: 'DELETE'
+            }).then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert('Ошибка при удалении вопроса.');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
