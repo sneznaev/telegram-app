@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавить привычку</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Добавить новую привычку</h1>
+        <form id="habit-form" action="/habits/new" method="post">
+            <div class="mb-3">
+                <label for="name" class="form-label">Название привычки</label>
+                <input type="text" id="name" name="name" class="form-control" maxlength="100" required>
+                <div class="form-text">Максимум 100 символов.</div>
+            </div>
+            <div class="mb-3">
+                <label for="type" class="form-label">Тип привычки</label>
+                <select id="type" name="type" class="form-select" required>
+                    <option value="yes_no">Да/Нет</option>
+                    <option value="measurable">Измеримая</option>
+                </select>
+            </div>
+            <div class="mb-3" id="target-value-group" style="display: none;">
+                <label for="target_value" class="form-label">Цель для измеримой привычки</label>
+                <input type="number" id="target_value" name="target_value" class="form-control" step="0.01" min="0">
+                <div class="form-text">Например: 10000 шагов, 30 страниц и т.д.</div>
+            </div>
+            <div class="mb-3">
+                <label for="period" class="form-label">Периодичность</label>
+                <select id="period" name="period" class="form-select" required>
+                    <option value="daily">Ежедневно</option>
+                    <option value="weekly">Еженедельно</option>
+                    <option value="monthly">Ежемесячно</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="color" class="form-label">Цвет привычки</label>
+                <input type="color" id="color" name="color" class="form-control" value="#FFFFFF">
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Сохранить</button>
+        </form>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Показ/скрытие поля для измеримых привычек
+        document.getElementById('type').addEventListener('change', function() {
+            const targetValueGroup = document.getElementById('target-value-group');
+            if (this.value === 'measurable') {
+                targetValueGroup.style.display = 'block';
+                document.getElementById('target_value').required = true;
+            } else {
+                targetValueGroup.style.display = 'none';
+                document.getElementById('target_value').required = false;
+            }
+        });
+
+        // Подтверждение перед отправкой формы
+        document.getElementById('habit-form').addEventListener('submit', function(event) {
+            const name = document.getElementById('name').value.trim();
+            if (!name) {
+                event.preventDefault();
+                Swal.fire('Ошибка', 'Название привычки обязательно для заполнения.', 'error');
+            }
+        });
+    </script>
+</body>
+</html>
