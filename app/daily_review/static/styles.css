@@ -1,0 +1,60 @@
+.date-picker {
+    font-size: 1.2rem;
+    padding: 0.5rem;
+    border: 2px solid #007bff;
+    border-radius: 0.25rem;
+    color: #007bff;
+    width: auto;
+    min-width: 200px;
+    max-width: 250px;
+    text-align: center;
+}
+
+.rating-stars {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.rating-stars .fa-star {
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: gray;
+}
+
+.rating-stars .selected {
+    color: gold;
+}
+
+.navigation-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.has-report {
+    background-color: #d4edda !important;
+    border-radius: 50%;
+    border: 2px solid #28a745;
+    color: #155724 !important;
+}
+
+.question-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.question-text {
+    flex-grow: 1;
+}
+
+.question-number {
+    width: 3rem;
+    text-align: center;
+    font-weight: bold;
+}
+
+.delete-icon {
+    cursor: pointer;
+    color: #dc3545;
+}
