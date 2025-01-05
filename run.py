@@ -7,6 +7,7 @@ from app.gallery import gallery_bp
 from app.goals import goals_bp
 from app.daily_review.views import daily_review_bp
 from app.habits.views import habits_bp
+from app.awareness.views import awareness_bp
 
 # Создаем приложение Flask
 def create_app():
@@ -20,6 +21,7 @@ def create_app():
     app.register_blueprint(goals_bp, url_prefix="/goals")
     app.register_blueprint(daily_review_bp, url_prefix="/daily-review")
     app.register_blueprint(habits_bp, url_prefix='/habits')
+    app.register_blueprint(awareness_bp, url_prefix='/awareness')
      
     # Инициализация базы данных
     with app.app_context():
