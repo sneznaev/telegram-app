@@ -28,7 +28,7 @@
 
             <div class="mb-3">
                 <label for="target_value" class="form-label">Целевое значение (для измеримых привычек)</label>
-                <input type="number" class="form-control" id="target_value" name="target_value" step="0.01" value="{{ habit.target_value if habit else '' }}">
+                <input type="number" class="form-control" id="target_value" name="target_value" step="0.01" value="{{ habit.target_value|int if habit else '' }}">
             </div>
 
             <div class="mb-3">

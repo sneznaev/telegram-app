@@ -5,6 +5,7 @@ from app.common.auth import login_required
 from app.habits.models import Habit, HabitLog
 from datetime import datetime, timedelta
 from sqlalchemy.orm import joinedload
+from flask import redirect, url_for
 
 habits_bp = Blueprint('habits', __name__, template_folder='templates', static_folder='static')
 
@@ -12,15 +13,55 @@ habits_bp = Blueprint('habits', __name__, template_folder='templates', static_fo
 @habits_bp.route('/', methods=['GET'])
 @login_required
 def list_habits():
-    """Главная страница с привычками"""
-    user_id = session.get('user_id')
+    user_id = session.get("user_id")
+    logger.info(f"Пользователь {user_id} открыл главную страницу привычек.")
+    
+    # Получение всех привычек пользователя
     habits = db_session.query(Habit).filter_by(user_id=user_id).all()
-    current_date = datetime.utcnow().date()
-    logger.info(f"Пользователь {user_id} открыл список привычек.")
-    return render_template('habits.html', habits=habits, current_date=current_date)
+    if not habits:
+        logger.info(f"У пользователя {user_id} нет созданных привычек.")
+    
+    # Генерация календаря: несколько дней до текущего дня
+    today = datetime.today().date()
+    days_to_show = 7  # Количество отображаемых дней
+    start_date = today - timedelta(days=days_to_show - 1)  # Начало диапазона дат
+    days = [
+        {
+            "date": start_date + timedelta(days=i),
+            "day_name": (start_date + timedelta(days=i)).strftime('%a'),  # День недели
+            "day_number": (start_date + timedelta(days=i)).day,  # Число
+            "is_today": (start_date + timedelta(days=i)) == today
+        } for i in range(days_to_show)
+    ]
+
+    # Формирование данных привычек и их логов
+    habits_data = []
+    for habit in habits:
+        logs = []
+        for day in days:
+            log = db_session.query(HabitLog).filter_by(habit_id=habit.id, date=day["date"]).first()
+            if not log:
+                log = HabitLog(habit, day["date"], value=0)  # Значение по умолчанию 0
+                db_session.add(log)
+            logs.append({"date": day["date"], "value": log.value, "is_completed": log.is_completed})
+        
+        habits_data.append({
+            "id": habit.id,
+            "name": habit.name,
+            "type": habit.type,
+            "color": habit.color,
+            "logs": logs
+        })
+    
+    db_session.commit()  # Сохранение добавленных логов
+
+    # Рендеринг шаблона
+    return render_template('habits.html', habits=habits_data, days=days)
 
 
-from flask import redirect, url_for
+
+
+
 
 @habits_bp.route('/new', methods=['GET', 'POST'])
 @login_required
@@ -129,35 +170,52 @@ def delete_habit(habit_id):
 
 @habits_bp.route('/<int:habit_id>/log', methods=['POST'])
 @login_required
-def log_habit(habit_id):
-    """Фиксация выполнения привычки"""
-    user_id = session.get('user_id')
+def toggle_habit_log(habit_id):
+    user_id = session.get("user_id")
+    logger.info(f"Пользователь {user_id} изменяет лог привычки с ID {habit_id}.")
+    
     habit = db_session.query(Habit).filter_by(id=habit_id, user_id=user_id).first()
     if not habit:
-        logger.warning(f"Пользователь {user_id} попытался зафиксировать выполнение несуществующей привычки с ID {habit_id}.")
+        logger.error(f"Привычка с ID {habit_id} не найдена для пользователя {user_id}.")
         return jsonify({"error": "Привычка не найдена"}), 404
 
     data = request.json
-    date = data.get('date')
-    value = data.get('value')
+    date_str = data.get("date")
+    if not date_str:
+        logger.error("Дата не передана в запросе.")
+        return jsonify({"error": "Дата обязательна"}), 400
 
     try:
-        date = datetime.strptime(date, '%Y-%m-%d').date()
+        date = datetime.strptime(date_str, '%Y-%m-%d').date()
     except ValueError:
-        logger.warning(f"Пользователь {user_id} указал некорректный формат даты: {date}.")
-        return jsonify({"error": "Некорректный формат даты"}), 400
+        logger.error("Неверный формат даты.")
+        return jsonify({"error": "Неверный формат даты"}), 400
 
-    log = HabitLog.query.filter_by(habit_id=habit_id, date=date).first()
+    log = db_session.query(HabitLog).filter_by(habit_id=habit.id, date=date).first()
     if not log:
-        log = HabitLog(habit_id=habit_id, date=date, value=value)
+        log = HabitLog(habit, date)
         db_session.add(log)
-    else:
+
+    if habit.type == "yes_no":
+        log.is_completed = not log.is_completed
+        log.value = 1 if log.is_completed else 0
+    elif habit.type == "measurable":
+        value = data.get("value", 0)
+        try:
+            value = int(value)  # Ограничение на целые числа
+        except ValueError:
+            logger.error("Введено некорректное значение.")
+            return jsonify({"error": "Некорректное значение"}), 400
+        
+
         log.value = value
-        log.is_completed = value is not None and (value >= habit.target_value if habit.type == 'measurable' else True)
+        log.is_completed = value >= (habit.target_value or 0)
 
     db_session.commit()
-    logger.info(f"Пользователь {user_id} зафиксировал выполнение привычки с ID {habit_id} на дату {date}.")
-    return jsonify({"message": "Фиксация успешна"}), 200
+    logger.info(f"Лог привычки {habit_id} для даты {date} успешно обновлен.")
+    return jsonify({"message": "Лог обновлен успешно", "value": log.value})
+
+
 
 
 
