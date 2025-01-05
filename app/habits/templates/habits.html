@@ -6,6 +6,7 @@
     <title>Трекер привычек</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         .habit-table th, .habit-table td {
             text-align: center;
@@ -42,33 +43,27 @@
             white-space: normal;
             color: inherit;
         }
-
-        /* Стили для статусов привычек типа да-нет */
-        .habit-status {
-            font-size: 1.2rem;
-            cursor: pointer;
-            display: inline-block;
-            width: 1.5rem;
-            height: 1.5rem;
-            line-height: 1.5rem;
-            text-align: center;
-        }
-
+		.habit-log  {
+			cursor: pointer; /* Курсор при наведении */
+		}
+        /* Стили для статусов привычек */
         .habit-status.completed {
-            color: green; /* Зеленая галочка для выполненных целей да-нет */
+            color: green; /* Зеленая галочка */
+            
         }
 
         .habit-status.not-completed {
-            color: gray; /* Серый крестик для невыполненных целей да-нет */
+            color: gray; /* Серый крестик */
+
         }
 
-        /* Стили для измеримых привычек */
         .habit-log.measurable-completed {
             color: green; /* Зеленый текст для выполненных измеримых целей */
-        }
 
+		}
         .habit-log {
             color: gray; /* Серый текст для невыполненных измеримых целей */
+
         }
     </style>
 </head>
@@ -105,11 +100,8 @@
                     {% for log in habit.logs %}
                         <td class="habit-log {{ 'measurable-completed' if habit.type == 'measurable' and log.is_completed else '' }}">
                             {% if habit.type == 'yes_no' %}
-                                <span  style="color: {{ habit.color }}
-                                    class="habit-status {{ 'completed' if log.is_completed else 'not-completed' }}" 
-                                    onclick="toggleHabitLog('{{ habit.id }}', '{{ log.date }}')">
-                                    {{ '✔' if log.is_completed else '✖' }}
-                                </span>
+                                <i class="bi {{ 'bi-check-lg habit-status completed' if log.is_completed else 'bi-x-lg habit-status not-completed' }}" 
+                                   onclick="toggleHabitLog('{{ habit.id }}', '{{ log.date }}')"></i>
                             {% else %}
                                 <span 
                                     class="habit-log {{ 'measurable-completed' if log.is_completed else '' }}"
@@ -124,7 +116,7 @@
             </tbody>
         </table>
     </div>
-    
+
     <!-- Модальное окно -->
     <div class="modal fade" id="habitValueModal" tabindex="-1" aria-labelledby="habitValueModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">

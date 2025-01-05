@@ -154,18 +154,27 @@ def edit_habit(habit_id):
 def delete_habit(habit_id):
     """Удаление привычки"""
     user_id = session.get('user_id')
+    logger.info(f"Пользователь {user_id} запросил удаление привычки с ID {habit_id}.")
+    
+    # Получение привычки
     habit = db_session.query(Habit).filter_by(id=habit_id, user_id=user_id).first()
     if not habit:
+        logger.warning(f"Привычка с ID {habit_id} не найдена для пользователя {user_id}.")
         flash("Привычка не найдена!")
-        logger.warning(f"Пользователь {user_id} попытался удалить несуществующую привычку с ID {habit_id}.")
         return redirect(url_for('habits.list_habits'))
 
+    # Удаление связанных логов
+    db_session.query(HabitLog).filter_by(habit_id=habit.id).delete()
+    logger.info(f"Все логи, связанные с привычкой {habit_id}, удалены.")
+
+    # Удаление самой привычки
     db_session.delete(habit)
     db_session.commit()
 
-    logger.info(f"Пользователь {user_id} удалил привычку с ID {habit.id}.")
+    logger.info(f"Пользователь {user_id} успешно удалил привычку с ID {habit_id}.")
     flash("Привычка успешно удалена!")
     return redirect(url_for('habits.list_habits'))
+
 
 
 @habits_bp.route('/<int:habit_id>/log', methods=['POST'])
