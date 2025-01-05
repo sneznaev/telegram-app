@@ -7,7 +7,7 @@ class AwarenessLog(Base):
     __tablename__ = 'awareness_logs'
     
     id = Column(Integer, primary_key=True)
-    user_id = Column(String(50), nullable=False)  # ID пользователя из Telegram
+    user_id = Column(Integer, nullable=False)  # ID пользователя из Telegram
     want = Column(Text, nullable=True)           # Что пользователь хочет
     happening = Column(Text, nullable=True)      # Что происходит
     doing = Column(Text, nullable=True)          # Что пользователь делает
