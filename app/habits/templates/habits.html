@@ -11,61 +11,65 @@
             text-align: center;
             vertical-align: middle;
         }
+
         .habit-table th {
             font-size: 0.85rem;
             padding: 5px;
         }
+
         .habit-table td:first-child {
             text-align: left;
-            white-space: nowrap;
         }
+
         .current-day {
             background-color: #f8f9fa;
             font-weight: bold;
         }
-        .habit-color {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-right: 8px;
-        }
+
         @media (max-width: 768px) {
             .habit-table th, .habit-table td {
                 font-size: 0.8rem;
                 padding: 3px;
             }
         }
-		
-		.habit-name {
-			max-width: 150px; /* Ограничиваем ширину */
-			word-wrap: break-word; /* Перенос слов */
-			text-align: left; /* Выровняем текст по левому краю */
-		}
-		.habit-status {
-			font-size: 1.2rem;
-			cursor: pointer;
-			display: inline-block;
-			width: 1.5rem;
-			text-align: center;
-		}
 
-		.habit-status.completed {
-			color: green; /* Зеленый текст для выполненных да-нет */
-		}
+        /* Стили для названий привычек */
+        .habit-name {
+            max-width: 150px;
+            word-wrap: break-word;
+            word-break: break-word;
+            text-align: left;
+            white-space: normal;
+            color: inherit;
+        }
 
-		.habit-status.not-completed {
-			color: red; /* Красный текст для невыполненных да-нет */
-		}
+        /* Стили для статусов привычек типа да-нет */
+        .habit-status {
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: inline-block;
+            width: 1.5rem;
+            height: 1.5rem;
+            line-height: 1.5rem;
+            text-align: center;
+        }
 
-		.habit-log.measurable-completed {
-			background-color: #28a745; /* Зеленый фон, соответствующий галочке */
-			color: white; /* Белый текст для контраста */
-		}
+        .habit-status.completed {
+            color: green; /* Зеленая галочка для выполненных целей да-нет */
+        }
 
+        .habit-status.not-completed {
+            color: gray; /* Серый крестик для невыполненных целей да-нет */
+        }
 
+        /* Стили для измеримых привычек */
+        .habit-log.measurable-completed {
+            color: green; /* Зеленый текст для выполненных измеримых целей */
+        }
 
-
+        .habit-log {
+            color: gray; /* Серый текст для невыполненных измеримых целей */
+        }
     </style>
 </head>
 <body>
@@ -78,77 +82,72 @@
         </div><br />
 
         <table class="table table-bordered habit-table">
-			<thead>
-				<tr>
-					<th>Привычка</th>
-					{% for day in days %}
-						<th>
-							<div>{{ day.day_name }}</div>
-							<div>{{ day.day_number }}</div>
-						</th>
-					{% endfor %}
-				</tr>
-			</thead>
+            <thead>
+                <tr>
+                    <th>Привычка</th>
+                    {% for day in days %}
+                        <th>
+                            <div>{{ day.day_name }}</div>
+                            <div>{{ day.day_number }}</div>
+                        </th>
+                    {% endfor %}
+                </tr>
+            </thead>
 
             <tbody>
                 {% for habit in habits %}
                 <tr>
                     <td class="habit-name">
-                        <a href="/habits/{{ habit.id }}/statistics" class="text-decoration-none text-dark">
-                            <span class="habit-color" style="background-color: {{ habit.color }}"></span>
+                        <a href="/habits/{{ habit.id }}/statistics" class="text-decoration-none" style="color: {{ habit.color }}">
                             {{ habit.name }}
                         </a>
                     </td>
                     {% for log in habit.logs %}
-					<td class="habit-log {{ 'measurable-completed' if habit.type == 'measurable' and log.is_completed else '' }}">
-						{% if habit.type == 'yes_no' %}
-							<span 
-								class="habit-status {{ 'completed' if log.is_completed else 'not-completed' }}" 
-								onclick="toggleHabitLog('{{ habit.id }}', '{{ log.date }}')">
-								{{ '✅' if log.is_completed else '❌' }}
-							</span>
-						{% else %}
-							<span 
-								class="habit-status" 
-								onclick="editHabitValue('{{ habit.id }}', '{{ log.date }}', '{{ log.value|int  }}')">
-								{{ log.value|int  or '...' }}
-							</span>
-						{% endif %}
-					</td>
-
-
-
+                        <td class="habit-log {{ 'measurable-completed' if habit.type == 'measurable' and log.is_completed else '' }}">
+                            {% if habit.type == 'yes_no' %}
+                                <span  style="color: {{ habit.color }}
+                                    class="habit-status {{ 'completed' if log.is_completed else 'not-completed' }}" 
+                                    onclick="toggleHabitLog('{{ habit.id }}', '{{ log.date }}')">
+                                    {{ '✔' if log.is_completed else '✖' }}
+                                </span>
+                            {% else %}
+                                <span 
+                                    class="habit-log {{ 'measurable-completed' if log.is_completed else '' }}"
+                                    onclick="editHabitValue('{{ habit.id }}', '{{ log.date }}', '{{ log.value|int }}')">
+                                    {{ log.value|int or '...' }}
+                                </span>
+                            {% endif %}
+                        </td>
                     {% endfor %}
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
-	
-<!-- Модальное окно -->
-<div class="modal fade" id="habitValueModal" tabindex="-1" aria-labelledby="habitValueModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="habitValueModalLabel">Введите значение</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <input type="number" id="habitValueInput" class="form-control" min="0" placeholder="Введите значение" />
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-        <button type="button" class="btn btn-primary" id="saveHabitValueButton">Сохранить</button>
-      </div>
+    
+    <!-- Модальное окно -->
+    <div class="modal fade" id="habitValueModal" tabindex="-1" aria-labelledby="habitValueModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="habitValueModalLabel">Введите значение</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="number" id="habitValueInput" class="form-control" min="0" placeholder="Введите значение" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-primary" id="saveHabitValueButton">Сохранить</button>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // для значений да-нет
-		function toggleHabitLog(habitId, date) {
+        function toggleHabitLog(habitId, date) {
             fetch(`/habits/${habitId}/log`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -157,33 +156,31 @@
               .then(data => location.reload());
         }
 
-		let currentHabitId = null;
-		let currentDate = null;
-		
-		// для измеримых начений
-		function editHabitValue(habitId, date, currentValue) {
-			currentHabitId = habitId;
-			currentDate = date;
+        let currentHabitId = null;
+        let currentDate = null;
+        
+        function editHabitValue(habitId, date, currentValue) {
+            currentHabitId = habitId;
+            currentDate = date;
 
-			const input = document.getElementById("habitValueInput");
-			input.value = currentValue || 0;
+            const input = document.getElementById("habitValueInput");
+            input.value = currentValue || 0;
 
-			const modal = new bootstrap.Modal(document.getElementById("habitValueModal"));
-			modal.show();
-		}
+            const modal = new bootstrap.Modal(document.getElementById("habitValueModal"));
+            modal.show();
+        }
 
-		document.getElementById("saveHabitValueButton").addEventListener("click", () => {
-			const input = document.getElementById("habitValueInput");
-			const value = parseInt(input.value, 10) || 0;
+        document.getElementById("saveHabitValueButton").addEventListener("click", () => {
+            const input = document.getElementById("habitValueInput");
+            const value = parseInt(input.value, 10) || 0;
 
-			fetch(`/habits/${currentHabitId}/log`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ date: currentDate, value: value })
-			}).then(response => response.json())
-			  .then(data => location.reload());
-		});
-
+            fetch(`/habits/${currentHabitId}/log`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ date: currentDate, value: value })
+            }).then(response => response.json())
+              .then(data => location.reload());
+        });
     </script>
 </body>
 </html>
