@@ -110,8 +110,8 @@
 						{% else %}
 							<span 
 								class="habit-status" 
-								onclick="editHabitValue('{{ habit.id }}', '{{ log.date }}', '{{ log.value }}')">
-								{{ log.value or '...' }}
+								onclick="editHabitValue('{{ habit.id }}', '{{ log.date }}', '{{ log.value|int  }}')">
+								{{ log.value|int  or '...' }}
 							</span>
 						{% endif %}
 					</td>
