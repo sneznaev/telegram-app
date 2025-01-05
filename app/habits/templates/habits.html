@@ -98,9 +98,9 @@
                         </a>
                     </td>
                     {% for log in habit.logs %}
-                        <td class="habit-log {{ 'measurable-completed' if habit.type == 'measurable' and log.is_completed else '' }}">
+                        <td class="habit-log {{ 'measurable-completed' if habit.type == 'measurable' and log.is_completed else '' }}" >
                             {% if habit.type == 'yes_no' %}
-                                <i class="bi {{ 'bi-check-lg habit-status completed' if log.is_completed else 'bi-x-lg habit-status not-completed' }}" 
+                                <i class="bi fs-5 {{ 'bi-check-lg habit-status completed' if log.is_completed else 'bi-x-lg habit-status not-completed' }}" 
                                    onclick="toggleHabitLog('{{ habit.id }}', '{{ log.date }}')"></i>
                             {% else %}
                                 <span 

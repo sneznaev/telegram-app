@@ -50,13 +50,14 @@
                     <option value="monthly">Ежемесячно</option>
                 </select>
             </div>
-            <div class="mb-3">
-                <label for="color" class="form-label">Цвет привычки</label>
-                <div class="color-picker-container">
-                    <div class="color-display" id="color-display" style="background-color: #000000;"></div>
-                    <input type="color" id="color" name="color" class="form-control d-none" value="#000000">
-                </div>
-            </div>
+			<div class="mb-3 d-flex align-items-center">
+				<label for="color" class="form-label me-3">Цвет привычки</label>
+				<div class="color-picker-container">
+					<div class="color-display" id="color-display" style="background-color: #000000; width: 30px; height: 30px; border: 1px solid #ccc; cursor: pointer;"></div>
+					<input type="color" id="color" name="color" class="form-control d-none" value="#000000">
+				</div>
+			</div>
+
             <button type="submit" class="btn btn-primary w-100 mb-2">Сохранить</button>
             <a href="/habits" class="btn btn-secondary w-100">Отмена</a>
         </form>
