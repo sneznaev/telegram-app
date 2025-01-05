@@ -33,6 +33,6 @@ class HabitLog(Base):
 
         # Автоматическая проверка выполнения цели
         if habit.type == "yes_no":
-            self.is_completed = value is not None  # Для да/нет: просто наличие значения
+            self.is_completed = False    
         elif habit.type == "measurable":
-            self.is_completed = value is not None and value >= habit.target_value  # Для измеримых: >= target_value
+            self.is_completed = value is not None and value >= habit.target_value  # Для измеримых: >= target_value 

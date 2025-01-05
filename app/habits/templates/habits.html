@@ -36,6 +36,36 @@
                 padding: 3px;
             }
         }
+		
+		.habit-name {
+			max-width: 150px; /* Ограничиваем ширину */
+			word-wrap: break-word; /* Перенос слов */
+			text-align: left; /* Выровняем текст по левому краю */
+		}
+		.habit-status {
+			font-size: 1.2rem;
+			cursor: pointer;
+			display: inline-block;
+			width: 1.5rem;
+			text-align: center;
+		}
+
+		.habit-status.completed {
+			color: green; /* Зеленый текст для выполненных да-нет */
+		}
+
+		.habit-status.not-completed {
+			color: red; /* Красный текст для невыполненных да-нет */
+		}
+
+		.habit-log.measurable-completed {
+			background-color: #28a745; /* Зеленый фон, соответствующий галочке */
+			color: white; /* Белый текст для контраста */
+		}
+
+
+
+
     </style>
 </head>
 <body>
@@ -63,24 +93,31 @@
             <tbody>
                 {% for habit in habits %}
                 <tr>
-                    <td>
+                    <td class="habit-name">
                         <a href="/habits/{{ habit.id }}/statistics" class="text-decoration-none text-dark">
                             <span class="habit-color" style="background-color: {{ habit.color }}"></span>
                             {{ habit.name }}
                         </a>
                     </td>
                     {% for log in habit.logs %}
-                        <td>
-                            {% if habit.type == 'yes_no' %}
-                                <button class="btn btn-sm btn-{{ 'success' if log.is_completed else 'outline-secondary' }}" onclick="toggleHabitLog('{{ habit.id }}', '{{ log.date }}')">
-                                    ✔
-                                </button>
-                            {% else %}
-								<button class="btn btn-sm btn-{{ 'success' if log.is_completed else 'outline-info' }}" onclick="editHabitValue('{{ habit.id }}', '{{ log.date }}', '{{ log.value|int }}')">
-									{{ log.value|int or '...' }}
-								</button>
-                            {% endif %}
-                        </td>
+					<td class="habit-log {{ 'measurable-completed' if habit.type == 'measurable' and log.is_completed else '' }}">
+						{% if habit.type == 'yes_no' %}
+							<span 
+								class="habit-status {{ 'completed' if log.is_completed else 'not-completed' }}" 
+								onclick="toggleHabitLog('{{ habit.id }}', '{{ log.date }}')">
+								{{ '✅' if log.is_completed else '❌' }}
+							</span>
+						{% else %}
+							<span 
+								class="habit-status" 
+								onclick="editHabitValue('{{ habit.id }}', '{{ log.date }}', '{{ log.value }}')">
+								{{ log.value or '...' }}
+							</span>
+						{% endif %}
+					</td>
+
+
+
                     {% endfor %}
                 </tr>
                 {% endfor %}

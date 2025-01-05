@@ -32,7 +32,7 @@ def list_habits():
             "day_number": (start_date + timedelta(days=i)).day,  # Число
             "is_today": (start_date + timedelta(days=i)) == today
         } for i in range(days_to_show)
-    ]
+    ][::-1]
 
     # Формирование данных привычек и их логов
     habits_data = []
